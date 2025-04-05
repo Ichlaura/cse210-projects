@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-// Comment class to track commenter name and text
+// Comment class to represent a single comment
 public class Comment
 {
     public string CommenterName { get; set; }
@@ -14,13 +14,13 @@ public class Comment
     }
 }
 
-// Video class to track video information and comments
+// Video class to represent a YouTube video
 public class Video
 {
     public string Title { get; set; }
     public string Author { get; set; }
     public int LengthInSeconds { get; set; }
-    private List<Comment> Comments { get; } = new List<Comment>();
+    private List<Comment> _comments = new List<Comment>();
 
     public Video(string title, string author, int length)
     {
@@ -29,29 +29,19 @@ public class Video
         LengthInSeconds = length;
     }
 
-    public void AddComment(string commenterName, string commentText)
+    public void AddComment(Comment comment)
     {
-        Comments.Add(new Comment(commenterName, commentText));
+        _comments.Add(comment);
     }
 
     public int GetNumberOfComments()
     {
-        return Comments.Count;
+        return _comments.Count;
     }
 
-    public void DisplayVideoInfo()
+    public List<Comment> GetComments()
     {
-        Console.WriteLine($"Title: {Title}");
-        Console.WriteLine($"Author: {Author}");
-        Console.WriteLine($"Length: {LengthInSeconds} seconds");
-        Console.WriteLine($"Number of Comments: {GetNumberOfComments()}");
-
-        Console.WriteLine("Comments:");
-        foreach (var comment in Comments)
-        {
-            Console.WriteLine($"- {comment.CommenterName}: {comment.CommentText}");
-        }
-        Console.WriteLine();
+        return new List<Comment>(_comments); // Return a copy to maintain encapsulation
     }
 }
 
@@ -59,42 +49,51 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Create list to hold videos
-        List<Video> videos = new List<Video>();
+        // Create videos
+        var video1 = new Video("C# Tutorial for Beginners", "ProgrammingMaster", 600);
+        var video2 = new Video("Learn Python in 10 Minutes", "CodeWizard", 360);
+        var video3 = new Video("ASP.NET Core Crash Course", "DotNetExpert", 720);
+        var video4 = new Video("Understanding OOP Principles", "SoftwareGuru", 480);
 
-        // Create and populate first video
-        Video video1 = new Video("C# Tutorial for Beginners", "Programming Master", 600);
-        video1.AddComment("JohnDoe", "Great tutorial!");
-        video1.AddComment("JaneSmith", "Very helpful, thanks!");
-        video1.AddComment("CodeNewbie", "When will you make part 2?");
-        videos.Add(video1);
+        // Add comments to video1
+        video1.AddComment(new Comment("User123", "Great tutorial!"));
+        video1.AddComment(new Comment("CodeNewbie", "Very helpful for beginners like me."));
+        video1.AddComment(new Comment("DevPro", "Could you make a video on advanced topics?"));
 
-        // Create and populate second video
-        Video video2 = new Video("ASP.NET Core Crash Course", "Web Dev Simplified", 1200);
-        video2.AddComment("WebDeveloper", "Clear explanations");
-        video2.AddComment("BackendGuy", "Could you cover middleware next?");
-        video2.AddComment("Student123", "Perfect timing for my project");
-        video2.AddComment("DotNetFan", "Love your teaching style!");
-        videos.Add(video2);
+        // Add comments to video2
+        video2.AddComment(new Comment("PythonLover", "Nice and concise!"));
+        video2.AddComment(new Comment("DataScientist", "Good overview of Python basics."));
+        video2.AddComment(new Comment("WebDev", "Would love to see a Django tutorial next."));
 
-        // Create and populate third video
-        Video video3 = new Video("Entity Framework Explained", "Data Access Pro", 900);
-        video3.AddComment("DatabaseAdmin", "Finally someone who explains migrations well");
-        video3.AddComment("JuniorDev", "This saved my project!");
-        video3.AddComment("TechLead", "Good overview of EF Core");
-        videos.Add(video3);
+        // Add comments to video3
+        video3.AddComment(new Comment("DotNetDev", "Excellent crash course!"));
+        video3.AddComment(new Comment("FullStack", "Clear explanations, thank you!"));
+        video3.AddComment(new Comment("BackendEngineer", "When will you cover Entity Framework?"));
+        video3.AddComment(new Comment("AspNetCoreFan", "Best ASP.NET Core tutorial I've seen!"));
 
-        // Create and populate fourth video
-        Video video4 = new Video("Design Patterns in C#", "Software Architect", 1500);
-        video4.AddComment("SeniorDev", "Excellent real-world examples");
-        video4.AddComment("TeamLead", "My team will watch this");
-        video4.AddComment("OOPFan", "Singleton pattern explained perfectly");
-        videos.Add(video4);
+        // Add comments to video4
+        video4.AddComment(new Comment("OOPStudent", "Finally understand abstraction!"));
+        video4.AddComment(new Comment("JavaDev", "These principles apply to Java too."));
+        video4.AddComment(new Comment("SeniorEngineer", "Good refresher on fundamentals."));
 
-        // Display information for all videos
+        // Put videos in a list
+        List<Video> videos = new List<Video> { video1, video2, video3, video4 };
+
+        // Display video information and comments
         foreach (var video in videos)
         {
-            video.DisplayVideoInfo();
+            Console.WriteLine($"Title: {video.Title}");
+            Console.WriteLine($"Author: {video.Author}");
+            Console.WriteLine($"Length: {video.LengthInSeconds} seconds");
+            Console.WriteLine($"Number of Comments: {video.GetNumberOfComments()}");
+            Console.WriteLine("Comments:");
+
+            foreach (var comment in video.GetComments())
+            {
+                Console.WriteLine($"- {comment.CommenterName}: {comment.CommentText}");
+            }
+
+            Console.WriteLine(); // Add blank line between videos
         }
     }
 }

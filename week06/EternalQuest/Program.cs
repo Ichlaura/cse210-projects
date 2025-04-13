@@ -1,6 +1,36 @@
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+
+
+/*
+ * Eternal Quest Program - Goal Tracking System
+ * 
+ * Exceeded Requirements Features:
+ * 1. Enhanced User Experience:
+ *    - Color-coded console output for better visual feedback
+ *    - Emoji icons for intuitive interface
+ *    - Motivational messages based on goal status
+ *    - Sound effects when achieving milestones (Console.Beep())
+ * 
+ * 2. Advanced Gamification:
+ *    - Tiered ranking system (Beginner → Faithful Novice → Eternal Warrior → Celestial Knight)
+ *    - Special visual effects when reaching new levels
+ *    - Bonus points system for checklist goals
+ * 
+ * 3. Robust Data Handling:
+ *    - Comprehensive error handling for file operations
+ *    - Detailed progress tracking for checklist goals
+ *    - Automatic score calculation with visual feedback
+ * 
+ * 4. Additional Features:
+ *    - Press any key to continue prompts for better pacing
+ *    - Input validation for all user entries
+ *    - Clear visual distinction between completed and pending goals
+ */
+
+
 
 class Program
 {

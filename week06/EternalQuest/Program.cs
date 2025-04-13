@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 class Program
 {
     static List<Goal> goals = new List<Goal>();
     static int score = 0;
+    static string filename = "goals.txt";
 
     static void Main(string[] args)
     {
+        LoadGoals();
+
         string input;
         do
         {
@@ -19,10 +23,20 @@ class Program
                 case "1": CreateGoal(); break;
                 case "2": ListGoals(); break;
                 case "3": RecordEvent(); break;
-                case "4": Console.ForegroundColor = ConsoleColor.Yellow; Console.WriteLine("Goodbye! ✌️"); Console.ResetColor(); break;
-                default: Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Invalid input ❌"); Console.ResetColor(); break;
+                case "4": SaveGoals(); break;
+                case "5": LoadGoals(); break;
+                case "6":
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("Goodbye! ✌");
+                    Console.ResetColor();
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Invalid input ❌");
+                    Console.ResetColor();
+                    break;
             }
-        } while (input != "4");
+        } while (input != "6");
     }
 
     static void ShowTitle()
@@ -45,7 +59,9 @@ class Program
         Console.WriteLine("1. 🛠️ Create New Goal");
         Console.WriteLine("2. 📋 List Goals");
         Console.WriteLine("3. ✅ Record Event");
-        Console.WriteLine("4. ❌ Quit");
+        Console.WriteLine("4. 💾 Save Goals");
+        Console.WriteLine("5. 📂 Load Goals");
+        Console.WriteLine("6. ❌ Quit");
         Console.Write("Choose an option: ");
     }
 
@@ -60,7 +76,6 @@ class Program
     static void CreateGoal()
     {
         string type = "";
-        // Validating goal type selection
         while (type != "1" && type != "2" && type != "3")
         {
             Console.WriteLine("What type of goal?");
@@ -81,7 +96,6 @@ class Program
         string name = Console.ReadLine();
 
         int points;
-        // Validating points per completion
         while (true)
         {
             Console.Write("Points per completion: ");
@@ -96,11 +110,14 @@ class Program
 
         switch (type)
         {
-            case "1": goals.Add(new SimpleGoal(name, points)); break;
-            case "2": goals.Add(new EternalGoal(name, points)); break;
+            case "1":
+                goals.Add(new SimpleGoal(name, points));
+                break;
+            case "2":
+                goals.Add(new EternalGoal(name, points));
+                break;
             case "3":
                 int target, bonus;
-                // Validating target number
                 while (true)
                 {
                     Console.Write("How many times to complete?: ");
@@ -112,7 +129,6 @@ class Program
                     Console.WriteLine("Invalid input! Please enter a valid number for target.");
                     Console.ResetColor();
                 }
-                // Validating bonus points
                 while (true)
                 {
                     Console.Write("Bonus points on completion: ");
@@ -126,73 +142,177 @@ class Program
                 }
                 goals.Add(new ChecklistGoal(name, points, target, bonus));
                 break;
-            default:
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Invalid type selection! Goal creation failed.");
-                Console.ResetColor();
-                return;
         }
+
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine("Goal created successfully! ✨");
         Console.ResetColor();
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
     }
 
- static void ListGoals()
-{
-    Console.WriteLine("\n📋 Your Goals:");
-    if (goals.Count == 0)
+    static void ListGoals()
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("No goals found. Create some first! ✨");
-        Console.ResetColor();
-        return;
-    }
-
-    int i = 1;
-    foreach (Goal g in goals)
-    {
-        string status = g.GetStatus();
-        if (status.Contains("[ ]"))  // Si el goal no está completado
+        Console.WriteLine("\n📋 Your Goals:");
+        if (goals.Count == 0)
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"{i++}. {status} - Keep going, you can do it! 💪");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("No goals found. Create some first! ✨");
+            Console.ResetColor();
         }
-        else  // Si el goal está completado
+        else
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"{i++}. {status} - Goal completed! 🎉");
+            int i = 1;
+            foreach (Goal g in goals)
+            {
+                string status = g.GetStatus();
+                if (status.Contains("[ ]"))
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"{i++}. {status} - Keep going, you can do it! 💪");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"{i++}. {status} - Goal completed! 🎉");
+                }
+            }
+            Console.ResetColor();
         }
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
-    Console.ResetColor();
-    Console.WriteLine();
-}
-
 
     static void RecordEvent()
     {
+        if (goals.Count == 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("No goals available to record. Create some first! ✨");
+            Console.ResetColor();
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+            return;
+        }
+
         Console.WriteLine("Which goal did you complete?");
         ListGoals();
+        Console.Write("Enter goal number: ");
+
         int index;
-        // Validating goal number input
-        while (true)
+        while (!int.TryParse(Console.ReadLine(), out index) || index < 1 || index > goals.Count)
         {
-            if (int.TryParse(Console.ReadLine(), out index) && index >= 1 && index <= goals.Count)
-            {
-                index--;  // Adjust for zero-based index
-                int gained = goals[index].RecordEvent();
-                score += gained;
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"🎉 You gained {gained} points!");
-                Console.ResetColor();
-                break;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Invalid input! Please select a valid goal number.");
-                Console.ResetColor();
-            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Invalid input! Please select a valid goal number.");
+            Console.ResetColor();
+            Console.Write("Enter goal number: ");
         }
+
+        index--;
+        int gained = goals[index].RecordEvent();
+        score += gained;
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"🎉 You gained {gained} points!");
+        Console.ResetColor();
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
+    }
+
+    static void SaveGoals()
+    {
+        try
+        {
+            using (StreamWriter outputFile = new StreamWriter(filename))
+            {
+                outputFile.WriteLine(score);
+                foreach (Goal goal in goals)
+                {
+                    outputFile.WriteLine(goal.GetStringRepresentation());
+                }
+            }
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Goals saved successfully! 💾");
+            Console.ResetColor();
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error saving goals: {ex.Message}");
+            Console.ResetColor();
+        }
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
+    }
+
+    static void LoadGoals()
+    {
+        if (!File.Exists(filename))
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("No saved goals found. Starting fresh! 🌱");
+            Console.ResetColor();
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+            return;
+        }
+
+        try
+        {
+            string[] lines = File.ReadAllLines(filename);
+            goals.Clear();
+
+            if (lines.Length > 0 && int.TryParse(lines[0], out int loadedScore))
+            {
+                score = loadedScore;
+            }
+
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[] parts = lines[i].Split(':');
+                string type = parts[0];
+                string[] details = parts[1].Split(',');
+
+                switch (type)
+                {
+                    case "SimpleGoal":
+                        bool isComplete = bool.Parse(details[1]);
+                        var simpleGoal = new SimpleGoal(details[0], int.Parse(details[2]));
+                        if (isComplete) simpleGoal.RecordEvent();
+                        goals.Add(simpleGoal);
+                        break;
+                    case "EternalGoal":
+                        goals.Add(new EternalGoal(details[0], int.Parse(details[1])));
+                        break;
+                    case "ChecklistGoal":
+                        int current = int.Parse(details[2]);
+                        int target = int.Parse(details[3]);
+                        var checklistGoal = new ChecklistGoal(
+                            details[0],
+                            int.Parse(details[1]),
+                            target,
+                            int.Parse(details[4]));
+                        for (int j = 0; j < current; j++)
+                        {
+                            checklistGoal.RecordEvent();
+                        }
+                        goals.Add(checklistGoal);
+                        break;
+                }
+            }
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Goals loaded successfully! 📂");
+            Console.ResetColor();
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error loading goals: {ex.Message}");
+            Console.ResetColor();
+        }
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
     }
 }
 
@@ -209,6 +329,7 @@ abstract class Goal
 
     public abstract int RecordEvent();
     public abstract string GetStatus();
+    public abstract string GetStringRepresentation();
 }
 
 class SimpleGoal : Goal
@@ -228,6 +349,9 @@ class SimpleGoal : Goal
     }
 
     public override string GetStatus() => _isComplete ? $"[X] {_name}" : $"[ ] {_name}";
+
+    public override string GetStringRepresentation() =>
+        $"SimpleGoal:{_name},{_isComplete},{_points}";
 }
 
 class EternalGoal : Goal
@@ -235,7 +359,11 @@ class EternalGoal : Goal
     public EternalGoal(string name, int points) : base(name, points) { }
 
     public override int RecordEvent() => _points;
+
     public override string GetStatus() => $"[∞] {_name}";
+
+    public override string GetStringRepresentation() =>
+        $"EternalGoal:{_name},{_points}";
 }
 
 class ChecklistGoal : Goal
@@ -257,20 +385,17 @@ class ChecklistGoal : Goal
             _currentCount++;
             if (_currentCount == _targetCount)
             {
-                Console.Beep(); // Sonido cuando se completa el objetivo
-                return _points + _bonus; // Da puntos adicionales al completar el objetivo
+                Console.Beep();
+                return _points + _bonus;
             }
-            return _points; // Solo puntos si no se completa aún
+            return _points;
         }
-        return 0; // No da puntos si el objetivo ya se completó
+        return 0;
     }
 
-    public override string GetStatus()
-    {
-        if (_currentCount >= _targetCount)
-        {
-            return $"[X] {_name} (Completed {_currentCount}/{_targetCount})";
-        }
-        return $"[ ] {_name} (Completed {_currentCount}/{_targetCount})";
-    }
+    public override string GetStatus() =>
+        $"{(_currentCount >= _targetCount ? "[X]" : "[ ]")} {_name} (Completed {_currentCount}/{_targetCount})";
+
+    public override string GetStringRepresentation() =>
+        $"ChecklistGoal:{_name},{_points},{_currentCount},{_targetCount},{_bonus}";
 }
